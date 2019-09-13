@@ -1,10 +1,10 @@
 # TPO UADE - PKI API
-API para generar Certificate Authority interna y gestionar la firma y renovacion de certificados digitales para tus aplicaciones.
+API para generar Certificate Authority interna para gestionar la firma y renovacion de certificados digitales para tus aplicaciones.
 
 ## Integrantes:
-  #### Calisi, Lucas Pablo
-  #### Alonso, Juan Cruz
-  #### Fernandez, Gonzalo Ariel
+  * Calisi, Lucas Pablo 
+  * Alonso, Juan Cruz
+  * Fernandez, Gonzalo Ariel
 
 
 
