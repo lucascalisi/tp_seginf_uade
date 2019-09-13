@@ -11,7 +11,7 @@ API para generar Certificate Authority interna para gestionar la firma y renovac
 
 #### Como corro la app?
 
-git clone https://github.com/lucascalisi/tp_seginf_uade.git
-cd tp_seginf_uade
-chmod o+rx docker-run.sh
-./docker-run.sh
+git clone https://github.com/lucascalisi/tp_seginf_uade.git <br/>
+cd tp_seginf_uade <br/>
+chmod o+rx docker-run.sh <br/>
+./docker-run.sh <br/>
