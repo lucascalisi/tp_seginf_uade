@@ -7,14 +7,15 @@ from app.config.CertificateManagerConfig import Config
 class CertificateManagerService:
     def __init__(self, common_name):
         self._config = Config()
-        self._common_name = common_name
         self._key_file = self._config.ca_files_path + common_name + self._config.key_file_extension
         self._crt_file = self._config.ca_files_path + common_name + self._config.cert_file_extension
+        self._common_name = common_name
+        self._ca_path = self._config.ca_files_path + common_name
 
 
-    def create_new_ca(self):
+    def create_new_ca(self, bits, validation_years):
         ca_key = crypto.PKey()
-        ca_key.generate_key(crypto.TYPE_RSA, 2048)
+        ca_key.generate_key(crypto.TYPE_RSA, bits)
 
         ca_cert = crypto.X509()
         ca_cert.set_version(2)
@@ -37,7 +38,7 @@ class CertificateManagerService:
         ca_cert.sign(ca_key, 'sha256')
 
         ca_cert.gmtime_adj_notBefore(0)
-        ca_cert.gmtime_adj_notAfter(20*365*24*60*60)
+        ca_cert.gmtime_adj_notAfter(validation_years*365*24*60*60)
 
         
         self._save_cert_in_file_system(ca_cert)
@@ -48,26 +49,23 @@ class CertificateManagerService:
             cert_str = crypto.dump_certificate(crypto.FILETYPE_PEM, cert).decode('ascii')
             file.write(cert_str)
 
-    def _save_key_in_file_system(self, key, common_name):
+    def _save_key_in_file_system(self, key):
         with open(self._key_file, "wt") as file:
             key_str = crypto.dump_privatekey(crypto.FILETYPE_PEM, key).decode('ascii')
             file.write(key_str)
 
-    def _check_root_path_exist(self):
-        ca_path = self._config.ca_files_path + self._common_name
-        if os.path.isfile(ca_path):
+    def _check_root_path_exist(self, ca_path):
+        if os.path.isdir(ca_path):
             return True
 
-    def _create_root_path(self):
-        print("CREO ROOT")
-        os.mkdir(self._config.ca_files_path, 700)
+    def _create_root_path(self, ca_folder):
+        os.mkdir(ca_folder, 700)
 
     def check_ca_exists(self):
-        if not self._check_root_path_exist():
-            print("NO EXISTE")
-            self._create_root_path()
-        
-        if os.path.isfile(self._key_file) and os.path.isfile(_crt_file):
+        if not self._check_root_path_exist(self._config.ca_files_path):
+            self._create_root_path(self._config.ca_files_path)
+
+        if os.path.isfile(self._key_file) and os.path.isfile(self._crt_file):
             return True
 
 
