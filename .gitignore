@@ -1,3 +1,5 @@
 # virtualenv
 .venv/
 venv/
+/app/CA_files
+__pycache__/
