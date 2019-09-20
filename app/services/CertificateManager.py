@@ -12,9 +12,10 @@ class CertificateManagerService:
         self._crt_file = self._config.ca_files_path + common_name + self._config.cert_file_extension
         self._common_name = common_name
         self._ca_path = self._config.ca_files_path + common_name
+        self._sign_algorithm = self._config.sign_algorithm
 
 
-    def create_new_ca(self, bits, validation_years):
+    def create_root_ca(self, bits, validation_years):
         ca_key = crypto.PKey()
         ca_key.generate_key(crypto.TYPE_RSA, bits)
 
@@ -36,7 +37,7 @@ class CertificateManagerService:
         ])
         ca_cert.set_issuer(ca_subj)
         ca_cert.set_pubkey(ca_key)
-        ca_cert.sign(ca_key, 'sha256')
+        ca_cert.sign(ca_key, self._sign_algorithm)
 
         ca_cert.gmtime_adj_notBefore(0)
         ca_cert.gmtime_adj_notAfter(validation_years*365*24*60*60)
@@ -69,48 +70,15 @@ class CertificateManagerService:
         if os.path.isfile(self._key_file) and os.path.isfile(self._crt_file):
             return True
 
-
-
-    def sign_certificate(self):
-        ###############
-        # Client Cert #
-        ###############
-
-        client_key = crypto.PKey()
-        client_key.generate_key(crypto.TYPE_RSA, 2048)
-
-        client_cert = crypto.X509()
-        client_cert.set_version(2)
-        client_cert.set_serial_number(random.randint(50000000,100000000))
-
-        client_subj = client_cert.get_subject()
-        client_subj.commonName = "Client"
-
-        client_cert.add_extensions([
-            crypto.X509Extension("basicConstraints", False, "CA:FALSE"),
-            crypto.X509Extension("subjectKeyIdentifier", False, "hash", subject=client_cert),
-        ])
-
-        client_cert.add_extensions([
-            crypto.X509Extension("authorityKeyIdentifier", False, "keyid:always", issuer=ca_cert),
-            crypto.X509Extension("extendedKeyUsage", False, "clientAuth"),
-            crypto.X509Extension("keyUsage", False, "digitalSignature"),
-        ])
-
-        client_cert.set_issuer(ca_subj)
-        client_cert.set_pubkey(client_key)
-        client_cert.sign(ca_key, 'sha256')
-
-        client_cert.gmtime_adj_notBefore(0)
-        client_cert.gmtime_adj_notAfter(10*365*24*60*60)
-
-        # Save certificate
-        with open("client.crt", "wt") as f:
-            f.write(crypto.dump_certificate(crypto.FILETYPE_PEM, client_cert))
-
-        # Save private key
-        with open("client.key", "wt") as f:
-            f.write(crypto.dump_privatekey(crypto.FILETYPE_PEM, client_key))
-#if __name__ == "__main__":
-#    ca_manager = CertificateManagerService('HSBC')
-#    ca_manager.create_new_ca()
+    def create_intermediate_ca(self, common_name, bits, issuer):
+        intermediate_key = PKey()
+        intermediate_key.generate_key(TYPE_RSA, bits)
+        intermediate_cert = X509()
+        intermediate_cert.get_subject().commonName = common_name
+        intermediate_cert.set_issuer(cacert.get_subject())
+        intermediate_cert.set_pubkey(ikey)
+        intermediate_cert.gmtime_adj_notBefore(0)
+        intermediate_cert.gmtime_adj_notAfter(2*365*24*60*60)
+        intermediate_cert.add_extensions([caext])
+        intermediate_cert.set_serial_number(0)
+        intermediate_cert.sign(cakey, self._sign_algorithm)

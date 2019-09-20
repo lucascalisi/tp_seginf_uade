@@ -3,7 +3,7 @@ class Config:
 		self._ca_files_path = '/app/CA_files/'
 		self._cert_file_extension = '.crt'
 		self._key_file_extension = '.key'
-
+		self._sign_algorithm = "sha256"
 
 	@property
 	def cert_file_extension(self):
@@ -16,4 +16,8 @@ class Config:
 	@property
 	def ca_files_path(self):
 		return self._ca_files_path
+	
+	@property
+	def sign_algorithm(self):
+		return self._sign_algorithm
 	

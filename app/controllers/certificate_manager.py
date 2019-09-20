@@ -10,7 +10,7 @@ bp = Blueprint("ca_manager", __name__)
 mime_type = 'application/json'
 
 @bp.route('/create', methods=['POST'])
-def create_new_ca():
+def create_new_root_ca():
 	try:
 		name, bits, valid_for = parse_create_ca_request(request)
 	except ParseRequestError as e:
@@ -20,7 +20,7 @@ def create_new_ca():
 	if ca_manager.check_ca_exists():
 		return Response(json.dumps({"message" : "Certificate Authority Exists"}), status=409, mimetype=mime_type)
     
-	ca_manager.create_new_ca(bits=bits, validation_years=valid_for)
+	ca_manager.create_root_ca(bits=bits, validation_years=valid_for)
 	return Response(json.dumps({"message" : f'CertificateAuthority - {name} created'}), status=201, mimetype=mime_type)
 
 def parse_create_ca_request(request):
