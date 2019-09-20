@@ -3,6 +3,7 @@ import os
 import sys
 import random
 from app.config.CertificateManagerConfig import Config
+from uuid import uuid4
 
 class CertificateManagerService:
     def __init__(self, common_name):
@@ -19,7 +20,7 @@ class CertificateManagerService:
 
         ca_cert = crypto.X509()
         ca_cert.set_version(2)
-        ca_cert.set_serial_number(random.randint(50000000,100000000))
+        ca_cert.set_serial_number(int(uuid()))
 
         ca_subj = ca_cert.get_subject()
         ca_subj.commonName = self._common_name
