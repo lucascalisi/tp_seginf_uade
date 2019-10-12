@@ -1,3 +1,12 @@
 #!/bin/bash
+
+#BUILD APP
 docker build -t pki-api .
-docker run -d -v $(pwd)/app/CA_files:/app/CA_files -it -p 8080:8080 pki-api 
+
+#PHISICAL PATH - IN HOST
+OS_PERSISTENCE_PATH=/tmp/CA_FILES
+
+#THIS VALUE MUST BE THE SAME CONFIG APP
+APP_PATH=/CA_FILES
+
+docker run -v $OS_PERSISTENCE_PATH:$APP_PATH -it -p 8080:8080 pki-api 
