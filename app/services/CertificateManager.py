@@ -4,6 +4,7 @@ from uuid import uuid4
 from app.errors.certificate import *
 from app.models.certificate import Certificate
 from app.utils.logger import Logger
+from datetime import datetime
 
 class CertificateManagerService:
     def __init__(self, root_config, sign_algorithm, app_path):
@@ -20,7 +21,6 @@ class CertificateManagerService:
             "intermediate" : f'{root_path}/intermediate',
             "server" : f'{root_path}/server'
         }
-        
         self.intermediate_authorities = []
 
         self.create_folders()
@@ -59,7 +59,13 @@ class CertificateManagerService:
             certificate = Certificate(ca_key, ca_cert, self.root_authority_name, "root")
             self._save_cert_in_file_system(certificate)
 
-            return certificate
+            self.root_authority = certificate
+            response = {
+                "name" : self.root_authority_name,
+                "certificate" : crypto.dump_certificate(crypto.FILETYPE_PEM, certificate.cert).decode('ascii'),
+                "certificateType": "intermediate"
+            }
+            return response
         except Exception as e:
             error = f'Create Root CA Error - {self.root_authority_name} - Error: [{e}]'
             Logger.log_error(error)
@@ -67,6 +73,8 @@ class CertificateManagerService:
 
         message = f'Create Root CA - OK - {self.root_authority_name}'
         Logger.log_info(message)
+
+
         
 
     def create_intermediate_ca(self, common_name, bits, validation_years):
@@ -96,10 +104,16 @@ class CertificateManagerService:
         certificate = Certificate(intermediate_key, intermediate_cert, common_name, "intermediate")
         self._save_cert_in_file_system(certificate)
         
-        return certificate
+        response = {
+            "name" : common_name,
+            "certificate" : crypto.dump_certificate(crypto.FILETYPE_PEM, certificate.cert).decode('ascii'),
+            "certificateType": "intermediate"
+        }
 
+        self.intermediate_ca = certificate
+        return response
 
-    def create_server_certificate(self, common_name, intermediate_name, bits, validation_years, export_format):
+    def create_server_certificate(self, common_name, intermediate_name, bits, validation_years):
         if self.exists_intermediate_certificate_authority(intermediate_name):
             intermediate_cert = self.get_intermediate_certificate(intermediate_name)
         else:
@@ -123,7 +137,17 @@ class CertificateManagerService:
         
         message = f'Server Certificate Create - OK - {common_name}'
         Logger.log_info(message)
-        return certificate
+
+        root_cert_ascii = crypto.dump_certificate(crypto.FILETYPE_PEM, self.root_certificate_authority.cert).decode('ascii')
+        intermediate_cert_ascii = crypto.dump_certificate(crypto.FILETYPE_PEM, intermediate_cert.cert).decode('ascii')
+        response = {
+            "name" : common_name,
+            "key": crypto.dump_privatekey(crypto.FILETYPE_PEM, certificate.key).decode('ascii'),
+            "certificate" : crypto.dump_certificate(crypto.FILETYPE_PEM, certificate.cert).decode('ascii'),
+            "certificateType": "server",
+            "certificateChain" : root_cert_ascii + intermediate_cert_ascii
+        }
+        return response
 
     def _save_cert_in_file_system(self, certificate):
         try:
