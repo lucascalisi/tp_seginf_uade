@@ -4,10 +4,6 @@ API para generar Certificate Authority interna para gestionar la firma y renovac
 ## Integrantes:
   * Calisi, Lucas Pablo 
   * Alonso, Juan Cruz
-  * Fernandez, Gonzalo Ariel
-
-
-
 
 #### Como corro la app?
 
