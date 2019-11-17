@@ -49,8 +49,7 @@ Generar Certificados para servidores firmados con una entidad intermedia
 		"Name" : "PRUEBA_LUCAS",
 		"Bits" : 2048,
 		"ValidFor" : 1,
-		"Signer" : "INTER_CA",
-		"Format" : "pkcs12"
+		"Signer" : "INTER_CA"
 	}
 }
 ```
