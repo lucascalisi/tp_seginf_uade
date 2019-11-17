@@ -19,18 +19,18 @@ mime_type = 'application/json'
 @bp.route('server/create', methods=['POST'])
 def create_server_certificate():
 	try:
-		name, bits, valid_for, intermediate_name, export_format = parse_create_server_certificate_request(request)
+		name, bits, valid_for, intermediate_name = parse_create_server_certificate_request(request)
 	except ParseRequestError as e:
 		return Response(json.dumps({"message" : e.error_desc}), status=400, mimetype=mime_type)
     
 	try:
-		ca_manager.create_server_certificate(name, intermediate_name, bits, valid_for, export_format)
+		response = ca_manager.create_server_certificate(name, intermediate_name, bits, valid_for)
 	except IntermediateCertificateNotFound as e:
 		return Response(json.dumps({"message" : e.error_desc}), status=400, mimetype=mime_type)
 	except SaveCertificateInFileSystemError as e:
 		return Response(json.dumps({"message" : e.error_desc}), status=400, mimetype=mime_type)
 		
-	return Response(json.dumps({"message" : f'Certificate Server - {name} - CREATED'}), status=201, mimetype=mime_type)
+	return Response(json.dumps(response), status=201, mimetype=mime_type)
 
 def parse_create_server_certificate_request(request):
 	try:
@@ -39,10 +39,9 @@ def parse_create_server_certificate_request(request):
 		bits = int(json_request['Certificate']['Bits'])
 		valid_for = int(json_request['Certificate']['ValidFor'])
 		intermediate_name = str(json_request['Certificate']['Signer'])
-		export_format = str(json_request['Certificate']['Format'])
 	
-		if name and bits and valid_for and intermediate_name and export_format:
-	  		return name, bits, valid_for, intermediate_name, export_format
+		if name and bits and valid_for and intermediate_name:
+	  		return name, bits, valid_for, intermediate_name
 	except Exception as e:
 		raise ParseRequestError("Invalid Parameters")
 
@@ -53,15 +52,14 @@ def create_intermediate_authority():
 		name, bits, valid_for = parse_create_intermediate_authority(request)
 	except ParseRequestError as e:
 		return Response(json.dumps({"message" : e.error_desc}), status=400, mimetype=mime_type)
-    
 	try:
-		ca_manager.create_intermediate_ca(name, bits, valid_for)
+		response = ca_manager.create_intermediate_ca(name, bits, valid_for)
 	except IntermediateCertificateAlreadyExists as e:
 		return Response(json.dumps({"message" : e.error_desc}), status=409, mimetype=mime_type)
 	except SaveCertificateInFileSystemError as e:
 		return Response(json.dumps({"message" : e.error_desc}), status=400, mimetype=mime_type)
 		
-	return Response(json.dumps({"message" : f'Intermediate Certificate Authority - {name} - CREATED'}), status=201, mimetype=mime_type)
+	return Response(json.dumps(response), status=201, mimetype=mime_type)
 
 def parse_create_intermediate_authority(request):
 	try:
@@ -69,7 +67,7 @@ def parse_create_intermediate_authority(request):
 		name = str(json_request['IntermediateCertificateAuthority']['Name'])
 		bits = int(json_request['IntermediateCertificateAuthority']['Bits'])
 		valid_for = int(json_request['IntermediateCertificateAuthority']['ValidFor'])
-	
+
 		if name and bits and valid_for:
 	  		return name, bits, valid_for
 	except Exception as e:

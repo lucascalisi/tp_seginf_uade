@@ -7,5 +7,5 @@ class Config:
 		self.root_authority_conf = {
 			"bit_size" : 2048,
 			"valid_years" : 20,
-			"name" : "PRUEBA_CA"
+			"name" : "UADE TP SegInf"
 		}
