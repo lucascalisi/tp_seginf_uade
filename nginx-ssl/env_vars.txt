@@ -1,0 +1,3 @@
+KEY_FILE=./nginx/uade-tp-seginf.edu.key
+CERTIFICATE_CHAIN_FILE=ceritifcate_chain.pem
+CERTIFICATE_FILE=./nginx/uade-tp-seginf.edu.crt

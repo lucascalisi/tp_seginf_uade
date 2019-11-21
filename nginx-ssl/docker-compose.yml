@@ -1,0 +1,11 @@
+version: '2'
+services:
+  server:
+    image: nginx:1.15
+    volumes:
+      - ./site:/usr/share/nginx/html
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf
+      - ./nginx/uade-tp-seginf.edu.crt:/etc/nginx/uade-tp-seginf.edu.crt
+      - ./nginx/uade-tp-seginf.edu.key:/etc/nginx/uade-tp-seginf.edu.key
+    ports:
+    - "18443:18443"
