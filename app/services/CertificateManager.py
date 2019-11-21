@@ -92,7 +92,7 @@ class CertificateManagerService:
         intermediate_cert.gmtime_adj_notAfter(validation_years*365*24*60*60)
         caext = crypto.X509Extension(b'basicConstraints', False, b'CA:true')
         intermediate_cert.add_extensions([caext])
-        intermediate_cert.set_serial_number(0)
+        intermediate_cert.set_serial_number(int(uuid4()))
         intermediate_cert.sign(self.root_certificate_authority.key, self.sign_algorithm)
 
         intermediate_authority = {
@@ -129,7 +129,7 @@ class CertificateManagerService:
         server_cert.gmtime_adj_notBefore(0)
         server_cert.gmtime_adj_notAfter(validation_years*365*24*60*60)
         server_cert.add_extensions([crypto.X509Extension(b'basicConstraints', True, b'CA:false')])
-        server_cert.set_serial_number(0)
+        server_cert.set_serial_number(int(uuid4()))
         server_cert.sign(intermediate_cert.key, self.sign_algorithm)
         
         certificate = Certificate(server_key, server_cert, common_name, "server")
